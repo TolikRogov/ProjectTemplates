@@ -139,7 +139,7 @@ build-src: configure-debug
 		exit 1; \
 	fi
 	@echo "Building $(FILE) with CMake..."
-	@if cd $(DEBUG_BUILD_DIR) && $(CMAKE) --build . --target $(FILE) 2>/dev/null; then \
+	@if cd $(DEBUG_BUILD_DIR) && $(CMAKE) --build . --target $(FILE); then \
 		echo "✓ Successfully built $(FILE)"; \
 	else \
 		echo "✗ Failed to build $(FILE) with CMake"; \
