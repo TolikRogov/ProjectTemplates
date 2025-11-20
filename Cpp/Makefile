@@ -56,7 +56,9 @@ help:
 	@echo "  run-release  		- Run release version"
 	@echo "  list-src		- Show source files"
 	@echo "  build-src     	- Build single file (usage: make build-src FILE=filename)"
-	@echo "  run-src     		- Build and run single file (usage: make run-src FILE=filename)"
+	@echo "  run-src     		- Build and run single file (usage: make run-src FILE=filename [ARGS=\"arguments\"])"
+	@echo "  run-src-debug     	- Build and run single file in debug mode (usage: make run-src-debug FILE=filename [ARGS=\"arguments\"])"
+	@echo "  run-src-release     	- Build and run single file in release mode (usage: make run-src-release FILE=filename [ARGS=\"arguments\"])"
 	@echo "  clean-debug  		- Clear debug assemble"
 	@echo "  clean-release 	- Clear release assemble"
 	@echo "  clean     		- Clear all assemblies"
@@ -104,13 +106,13 @@ configure: configure-debug configure-release
 .PHONY: run-debug
 run-debug: debug
 	@echo "Run debug version..."
-	@./$(DEBUG_BUILD_DIR)/$(PROJECT_NAME)
+	@./$(DEBUG_BUILD_DIR)/$(PROJECT_NAME) $(ARGS)
 
 # Run release version
 .PHONY: run-release
 run-release: release
 	@echo "Run release version..."
-	@./$(RELEASE_BUILD_DIR)/$(PROJECT_NAME)
+	@./$(RELEASE_BUILD_DIR)/$(PROJECT_NAME) $(ARGS)
 
 # Show available source files in src
 .PHONY: list-src
@@ -146,11 +148,42 @@ build-src: configure-debug
 		exit 1; \
 	fi
 
-# Run single file using CMake
+# Build single file in release mode
+.PHONY: build-src-release
+build-src-release: configure-release
+	@if [ -z "$(FILE)" ]; then \
+		echo "Error: Please specify FILE parameter (filename without extension)"; \
+		echo "Usage: make build-src-release FILE=filename"; \
+		echo ""; \
+		echo "Available source files:"; \
+		$(MAKE) list-src; \
+		exit 1; \
+	fi
+	@echo "Building $(FILE) in release mode with CMake..."
+	@if cd $(RELEASE_BUILD_DIR) && $(CMAKE) --build . --target $(FILE); then \
+		echo "✓ Successfully built $(FILE) in release mode"; \
+	else \
+		echo "✗ Failed to build $(FILE) with CMake"; \
+		exit 1; \
+	fi
+
+# Run single file using CMake (debug mode by default)
 .PHONY: run-src
 run-src: build-src
-	@echo "Running $(FILE)..."
-	@./$(DEBUG_BUILD_DIR)/$(FILE)
+	@echo "Running $(FILE) with arguments: $(ARGS)"
+	@./$(DEBUG_BUILD_DIR)/$(FILE) $(ARGS)
+
+# Run single file in debug mode with arguments
+.PHONY: run-src-debug
+run-src-debug: build-src
+	@echo "Running $(FILE) in debug mode with arguments: $(ARGS)"
+	@./$(DEBUG_BUILD_DIR)/$(FILE) $(ARGS)
+
+# Run single file in release mode with arguments
+.PHONY: run-src-release
+run-src-release: build-src-release
+	@echo "Running $(FILE) in release mode with arguments: $(ARGS)"
+	@./$(RELEASE_BUILD_DIR)/$(FILE) $(ARGS)
 
 # Clear debug assemble
 .PHONY: clean-debug
