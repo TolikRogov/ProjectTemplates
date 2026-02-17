@@ -7,7 +7,7 @@ ifneq (,$(wildcard ./.env))
 endif
 
 # Project configurations
-PROJECT_NAME := $(PROJECT_NAME)
+PROJECT_NAME := MyProject
 BUILD_DIR := build
 SOURCE_DIR := src
 DEBUG_BUILD_DIR := $(BUILD_DIR)/Debug
